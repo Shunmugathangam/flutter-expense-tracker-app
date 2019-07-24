@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expensetracker/model/category_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:expensetracker/repository/database.dart';
 
 class CategoryRepository {
-
-  final db = Firestore.instance;
 
   final dbHelper = DatabaseHelper.instance;
 
@@ -13,8 +10,6 @@ class CategoryRepository {
   static final colCategoryId = 'categoryId';
   static final colIsActive = 'isActive';
   static final colCategoryType = 'categoryType';
-
-  // sqflite
 
   Future<List<Map<String, dynamic>>> queryAllRows() async {
     Database db = await dbHelper.database;

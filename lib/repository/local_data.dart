@@ -9,6 +9,7 @@ class LocalDataRepository {
         DropdownModel(key: CategoryType.none, value: "--Select Type--"),
         DropdownModel(key: CategoryType.income, value: "Income"),
         DropdownModel(key: CategoryType.expense, value: "Expense"),
+        DropdownModel(key: CategoryType.budget, value: "Budget"),
       ];
   }
 
