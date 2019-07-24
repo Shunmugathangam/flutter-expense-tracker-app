@@ -33,3 +33,8 @@ class OnDeleteTrackDetailsEvent extends TrackEvent {
   final int idx;
   OnDeleteTrackDetailsEvent(this.idx);
 }
+
+class OnTrackUpdateAmountEvent extends TrackEvent {
+  final int amount;
+  OnTrackUpdateAmountEvent(this.amount);
+}

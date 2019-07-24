@@ -34,8 +34,6 @@ class  CategoryBloc {
       _inCategoryValue.add(categoryModelList);
   }
 
-  // sqflite
-
   void insertCategory(CategoryModel categoryModel) async {
     await db.insertCategory(categoryModel.toJson());
     categoryEvent.add(OnAddCategoryEvent(categoryModel));
@@ -47,7 +45,6 @@ class  CategoryBloc {
   }
 
   void softDeleteCategory(int idx, CategoryModel categoryModel) async {
-    print(categoryModel.toJson());
     await db.updateCategory(categoryModel.toJson());
     categoryEvent.add(OnDeleteCategoryEvent(idx));
   }
@@ -67,6 +64,33 @@ class  CategoryBloc {
       final rows = await db.getActiveCategoriesByType(categoryType);
       rows.forEach((row) => categoryEvent.add(OnAddCategoryEvent(CategoryModel.fromJson(row))));
       return rows;
+  }
+
+  Future getCategoriesByType(CategoryType categoryType) async{
+      final rows = await db.getActiveCategoriesByType(categoryType);
+      if(categoryModelList.length > 0)
+        categoryModelList.clear();
+      rows.forEach((row) => categoryEvent.add(OnAddCategoryEvent(CategoryModel.fromJson(row))));
+      return rows;
+  }
+
+
+  Future<List<CategoryModel>> getActiveCategoryList() async {
+    final rows = await db.getActiveCategories();
+    List<CategoryModel> lstCategory = new List<CategoryModel>();
+    rows.forEach((row) {
+       lstCategory.add(CategoryModel.fromJson(row));
+    });
+    return lstCategory;
+  }
+
+  Future<List<CategoryModel>> getActiveCategoryListByType(CategoryType categoryType) async {
+    final rows = await db.getActiveCategoriesByType(categoryType);
+    List<CategoryModel> lstCategory = new List<CategoryModel>();
+    rows.forEach((row) {
+       lstCategory.add(CategoryModel.fromJson(row));
+    });
+    return lstCategory;
   }
 
   void dispose() {
