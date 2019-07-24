@@ -40,8 +40,9 @@ class TrackDetailsModel {
   String categoryDesc;
   int categoryType;
   int isCategoryActive;
+  int color;
 
-  TrackDetailsModel({this.trackId, this.categoryId, this.categoryName, this.categoryDesc, this.categoryType, this.isCategoryActive, this.description, this.amount, this.trackDate, this.other});
+  TrackDetailsModel({this.trackId, this.categoryId, this.categoryName, this.categoryDesc, this.categoryType, this.isCategoryActive, this.description, this.amount, this.trackDate, this.other, this.color});
 
   TrackDetailsModel.fromJson(Map json)
       : trackId = json['trackId'],
@@ -53,7 +54,8 @@ class TrackDetailsModel {
         categoryName = json['categoryName'],
         categoryDesc = json['categoryDesc'],
         categoryType = json['categoryType'],
-        isCategoryActive = json['isActive'];
+        isCategoryActive = json['isActive'],
+        color = json['color'];
 
   Map<String, dynamic> toJson() =>
     {
@@ -69,4 +71,31 @@ class TrackDetailsModel {
       'isActive': isCategoryActive
     };
 
+}
+
+
+class  MonthWiseTotalAmountModel {
+  int year;
+  int month;
+  int categoryType;
+  int totalAmount;
+  // String categoryTypeName;
+  // int incomeAmount;
+  // int expenseAmount;
+  // int budgetAmount;
+  
+  MonthWiseTotalAmountModel({this.year, this.month, this.categoryType, this.totalAmount});
+
+  MonthWiseTotalAmountModel.fromJson(Map json)
+      : year = json['Year'],
+        month = json['Month'],
+        categoryType = json['CategoryType'],
+        totalAmount = json['TotalAmount'];
+
+  Map<String, dynamic> toJson() =>
+    {
+      'Year': year,
+      'Month': month,
+      'TotalAmount': totalAmount
+    };
 }
