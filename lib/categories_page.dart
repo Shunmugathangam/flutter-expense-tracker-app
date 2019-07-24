@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:expensetracker/model/dropdown_model.dart';
 import 'package:expensetracker/bloc/dropdown_bloc.dart';
 import 'package:expensetracker/bloc/dropdown_event.dart';
 import 'package:expensetracker/bloc/categorytype_bloc.dart';
 import 'package:expensetracker/model/category_model.dart';
 import 'package:expensetracker/bloc/category_bloc.dart';
+import 'package:expensetracker/common/color.dart';
+import 'package:expensetracker/sidedrawer.dart';
+
 
 class CategoriesScreen extends StatefulWidget {
   final BuildContext context;
@@ -26,6 +30,7 @@ class CategoriesState extends State<CategoriesScreen> {
   int selectedCategoryId = 0;
   int selectedCategoryIdx;
   String btnSubmit = "Add";
+  int colorCode = defaultColorCode();
 
   @override
   void initState() {
@@ -48,17 +53,20 @@ class CategoriesState extends State<CategoriesScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        title: Text('Categories'),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.close),
-            onPressed: () {
-              Navigator.pop(widget.context);
-            },
-          )
-        ],
-      ),
+          leading: Builder(
+            builder: (context) => IconButton(
+                  icon: new Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+          ),
+          title: Text('Categories'),
+          centerTitle: true,
+          actions: <Widget>[
+            Icon(Icons.category),
+            Padding(padding: EdgeInsets.only(right: 10.0),)
+          ],
+        ),
+      drawer: sideDrawer(context),
       body: Column(children: <Widget>[
         StreamBuilder(
           stream: categorytypesbloc.getCategoryTypes,
@@ -82,12 +90,22 @@ class CategoriesState extends State<CategoriesScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
+             Text("Category Color: ", style: TextStyle(color: Color(defaultColorCode())),),
+             Container(color: Color(colorCode), child: SizedBox(width: 60, height: 20,),),
+             IconButton(icon: Icon(Icons.color_lens), onPressed: () {
+                  colorDialog(context);
+             },)
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(right: 20),
               child: RaisedButton(
                 padding: const EdgeInsets.all(8.0),
-                textColor: Colors.white,
-                color: Colors.blue,
+                textColor: Theme.of(context).textTheme.display1.color,
+                color: Theme.of(context).primaryColor,
                 onPressed: addCategory,
                 child: new Text(btnSubmit),
               ),
@@ -103,6 +121,43 @@ class CategoriesState extends State<CategoriesScreen> {
         )
       ]),
     );
+  }
+
+  Future<String> colorDialog(BuildContext context) async {
+      
+
+      return showDialog<String>(
+        context: context,
+        barrierDismissible: false, // dialog is dismissible with a tap on the barrier
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Select the Color'),
+            content: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: <Widget>[
+                  MaterialColorPicker(
+                     onColorChange: (Color color) {
+                         setState(() {
+                            colorCode =  color.value;
+                         });
+                     },
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Ok'),
+                textColor: Theme.of(context).primaryColor,
+                onPressed: () {
+                  Navigator.of(context).pop("Ok");
+                },
+              ),
+            ],
+          );
+        },
+      );
   }
 
   Widget buildCategoryTypeDropdownList(AsyncSnapshot<List<DropdownModel>> snapshot) {
@@ -188,7 +243,7 @@ class CategoriesState extends State<CategoriesScreen> {
 
   DataCell _createCellsForElement(int idx, CategoryModel categoryModel, Object cellData) {
     return DataCell(
-      cellData.runtimeType == String ?  Text(cellData) : iconCloseBtn(cellData, idx, categoryModel),
+      cellData.runtimeType == String ?  Text(cellData, style: TextStyle(color: getCategoryColor(categoryModel.color)),) : iconCloseBtn(cellData, idx, categoryModel),
       showEditIcon: false,
       placeholder: false,
       onTap: () {
@@ -201,9 +256,36 @@ class CategoriesState extends State<CategoriesScreen> {
      return IconButton(
             icon: Icon(iconData),
             onPressed: () {
-              softDeleteCategory(idx, categoryModel);
+              onSoftDeleteCategory(idx, categoryModel);
             },
           );
+  }
+
+  onSoftDeleteCategory(int idx, CategoryModel categoryModel){
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Alert"),
+            content: Text("Are you want to delete this category data"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Yes"),
+                onPressed: () {
+                  softDeleteCategory(idx, categoryModel);
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: Text("No"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
   }
 
   showAlert(String title, String msg){
@@ -233,7 +315,7 @@ class CategoriesState extends State<CategoriesScreen> {
         if (_categoryBloc.categoryModelList.where((l) => l.categoryName == txtController.text.trim() && l.categoryType == ddlSelectedValue.key).length == 0){
               CategoryModel categoryModel = CategoryModel(categoryName: txtController.text.trim(), 
                                                           categoryDesc: ddlSelectedValue.value, categoryType: ddlSelectedValue.key,
-                                                          orderBy: 1, isActive: 1);
+                                                          orderBy: 1, isActive: 1, color: colorCode);
 
               addCategoryData(categoryModel);
               txtController.clear();
@@ -254,18 +336,29 @@ class CategoriesState extends State<CategoriesScreen> {
   }
 
   editCategory(int idx, CategoryModel categoryModel) {
-    changeBtnText("Update");
-    selectedCategoryIdx = idx;
-     DropdownModel ddlSel = new  DropdownModel(key: categoryModel.categoryType, value: categoryModel.categoryDesc);
-    _ddlBloc.dropdownEvent.add(OnSelectedEvent(ddlSel));
-    txtController.text = categoryModel.categoryName;
-    selectedCategoryId = categoryModel.categoryId;
+      changeBtnText("Update");
+      selectedCategoryIdx = idx;
+      DropdownModel ddlSel = new  DropdownModel(key: categoryModel.categoryType, value: categoryModel.categoryDesc);
+      _ddlBloc.dropdownEvent.add(OnSelectedEvent(ddlSel));
+      txtController.text = categoryModel.categoryName;
+      selectedCategoryId = categoryModel.categoryId;
+      print(categoryModel.color);
+      if(categoryModel.color != null) {
+          setState(() {
+              colorCode =  categoryModel.color;
+          });
+      }
+      else {
+        setState(() {
+              colorCode =  defaultColorCode();
+        });
+      }
   }
 
   updateCategory(int selectedCategoryIdx) {
       CategoryModel categoryModel = CategoryModel(categoryId: selectedCategoryId, categoryName: txtController.text.trim(), 
                                                           categoryDesc: ddlSelectedValue.value, categoryType: ddlSelectedValue.key,
-                                                          orderBy: 1, isActive: 1);
+                                                          orderBy: 1, isActive: 1, color: colorCode);
       updateCategoryData(selectedCategoryIdx, categoryModel);
       clearFields();
   }
@@ -287,8 +380,6 @@ class CategoriesState extends State<CategoriesScreen> {
   doNothing(){
     //print("doNothing");
   }
-
-  // Sqflite
 
   Future<void> addCategoryData(CategoryModel categoryModel) async {
     _categoryBloc.insertCategory(categoryModel);

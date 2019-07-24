@@ -1,6 +1,9 @@
+import 'package:expensetracker/sidedrawer.dart';
+import 'package:expensetracker/common/user_sharedpreference.dart';
 import 'package:flutter/material.dart';
 import 'package:expensetracker/track_list_page.dart';
 import 'package:expensetracker/model/category_model.dart';
+import 'package:expensetracker/theme.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -14,25 +17,37 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  bool _coloredTabMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initTabMode();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _select(Choice choice) {
-    if(choice.key == "Category"){
-      Navigator.pushNamed(context, "/categories");
+    if(choice.key == "Logout") {
+      clearSharedPreference();
+      Navigator.of(context).pushNamedAndRemoveUntil("/login", (Route<dynamic> route) => false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-   
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+      drawer: sideDrawer(context),
       appBar: AppBar(
-            backgroundColor: Colors.blue,
             bottom: TabBar(
-              tabs: [
-                Tab(text: "Expenses"),
-                Tab(text: "Incomes"),
-              ],
+              indicatorColor: Theme.of(context).primaryColor,
+              tabs: tabList(),
             ),
             title: Text('Tracker'),
             actions: <Widget>[
@@ -54,11 +69,52 @@ class _HomePageState extends State<HomePage> {
             children: [
               TrackList(CategoryType.expense),
               TrackList(CategoryType.income),
+              TrackList(CategoryType.budget),
             ],
           ),
     ),
     ); 
   }
+
+  List<Widget> tabList() {
+
+     if(_coloredTabMode == true)
+     {
+        double width = MediaQuery.of(context).size.width;
+        double tabWidth = width  / 3;
+        return  [
+                  ClipRRect(borderRadius: BorderRadius.circular(40.0),child: Container(width: tabWidth,height: 40.0,color: Colors.red,child: Center(child: new Text("EXPENSES"),),),),
+                  ClipRRect(borderRadius: BorderRadius.circular(40.0),child: Container(width: tabWidth,height: 40.0,color: Colors.green,child: Center(child: new Text("INCOMES"),),),),
+                  ClipRRect(borderRadius: BorderRadius.circular(40.0),child: Container(width: tabWidth,height: 40.0,color: Colors.orange,child: Center(child: new Text("BUDGET"),),),),
+                ];
+     }
+     else
+     {
+       return  [
+                 Tab(text: "EXPENSES",),
+                 Tab(text: "INCOMES",),
+                 Tab(text: "BUDGET",),
+                ];
+     }           
+  }
+
+  void initTabMode() {
+    getSharedPreference(ThemeSharedPreferenceKey.tab.index.toString()).then((onValue) {
+        if(onValue == "box") {
+          setTabMode(true);
+        }
+        else {
+          setTabMode(false);
+        }
+      });
+  }
+ 
+  void setTabMode(bool tabMode) {
+      setState(() {
+         _coloredTabMode = tabMode;
+      });
+  }
+
 }
 
 
@@ -71,6 +127,5 @@ class Choice {
 }
 
 const List<Choice> choices = const <Choice>[
-  const Choice(key: 'Category', title: 'Category', icon: Icons.settings),
-  const Choice(key: 'Chart', title: 'View Chart', icon: Icons.pie_chart_outlined),
+  const Choice(key: 'Logout', title: 'Logout', icon: Icons.keyboard_arrow_left)
 ];

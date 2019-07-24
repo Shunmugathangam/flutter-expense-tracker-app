@@ -106,6 +106,7 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
             children: <Widget>[
               _categoryField(),
               TextFormField(
+                keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Please enter the Amount';
@@ -160,10 +161,16 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
     );
   }
 
-  Widget buildCategoryDropdownList(
-      AsyncSnapshot<List<CategoryModel>> snapshot, FormFieldState state) {
+  Widget buildCategoryDropdownList({AsyncSnapshot<List<CategoryModel>> asynclstCategoryModel, List<CategoryModel> lstCategoryModel, FormFieldState state}) {
+    List<CategoryModel> lstCategory;
+    if(asynclstCategoryModel != null) {
+      lstCategory = asynclstCategoryModel.data;
+    }
+    else if (lstCategoryModel != null){
+        lstCategory = lstCategoryModel;
+    }
     return DropdownButton<CategoryModel>(
-      items: snapshot.data.map((CategoryModel val) {
+      items: lstCategory.map((CategoryModel val) {
         return DropdownMenuItem<CategoryModel>(
           value: val,
           child: Text(val.categoryName),
@@ -171,8 +178,7 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
       }).toList(),
       isDense: true,
       onChanged: (value) {
-        DropdownModel ddlV =
-            new DropdownModel(key: value.categoryId, value: value.categoryName);
+        DropdownModel ddlV = new DropdownModel(key: value.categoryId, value: value.categoryName);
         _data.categoryId = value.categoryId;
         _ddlBloc.dropdownEvent.add(OnSelectedEvent(ddlV));
         state.didChange(value.categoryId);
@@ -200,8 +206,8 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
             padding: const EdgeInsets.only(right: 10, top: 20),
             child: RaisedButton(
               padding: const EdgeInsets.all(8.0),
-              textColor: Colors.white,
-              color: Colors.blue,
+              textColor: Theme.of(context).textTheme.display1.color,
+              color: Theme.of(context).primaryColor,
               onPressed: onSaveTrack,
               child: new Text("Save"),
             )),
@@ -209,8 +215,8 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
             padding: const EdgeInsets.only(right: 10, top: 20),
             child: RaisedButton(
               padding: const EdgeInsets.all(8.0),
-              textColor: Colors.white,
-              color: Colors.blue,
+              textColor: Theme.of(context).textTheme.display1.color,
+              color: Theme.of(context).primaryColor,
               onPressed: onDeleteTrack,
               child: new Text("Delete"),
             )),
@@ -221,8 +227,8 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
             padding: const EdgeInsets.only(right: 10, top: 20),
             child: RaisedButton(
               padding: const EdgeInsets.all(8.0),
-              textColor: Colors.white,
-              color: Colors.blue,
+              textColor: Theme.of(context).textTheme.display1.color,
+              color: Theme.of(context).primaryColor,
               onPressed: onSaveTrack,
               child: new Text("Save"),
             )),
@@ -252,19 +258,35 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
               child: DropdownButtonHideUnderline(
                 child: StreamBuilder(
                   stream: _categoryBloc.categoryValue,
-                  builder:
-                      (context, AsyncSnapshot<List<CategoryModel>> snapshot) {
+                  builder: (context, AsyncSnapshot<List<CategoryModel>> snapshot) {
                     if (snapshot.hasData) {
-                      return buildCategoryDropdownList(snapshot, state);
+                      if (trackDetailsModel != null){
+                          int count = snapshot.data.where((categories) => categories.categoryId == trackDetailsModel.categoryId).length;
+                          if(count == 0){
+                            CategoryModel categoryModel = new CategoryModel(categoryId: trackDetailsModel.categoryId, categoryDesc: trackDetailsModel.categoryDesc, categoryName: trackDetailsModel.categoryName);
+                            snapshot.data.insert(0, categoryModel);
+                          }
+                      }
+                      return buildCategoryDropdownList(asynclstCategoryModel: snapshot, state: state);
                     } else if (snapshot.hasError) {
                       return Text(snapshot.error.toString());
                     }
-                    return DropdownButton(
-                      items: [],
-                      isDense: true,
-                      hint: Text("--Select Category--"),
-                      onChanged: (value) => {},
-                    );
+                    else{
+                      if (trackDetailsModel != null){
+                         CategoryModel categoryModel = new CategoryModel(categoryId: trackDetailsModel.categoryId, categoryDesc: trackDetailsModel.categoryDesc, categoryName: trackDetailsModel.categoryName);
+                         List<CategoryModel> lstCategoryModel = new List<CategoryModel>();
+                         lstCategoryModel.insert(0, categoryModel);
+                         return buildCategoryDropdownList(lstCategoryModel: lstCategoryModel, state: state);
+                      }
+                      else {
+                            return DropdownButton(
+                            items: [],
+                            isDense: true,
+                            hint: Text("--Select Category--"),
+                            onChanged: (value) => {},
+                          );
+                      }
+                    }
                     //return Center(child: CircularProgressIndicator());
                   },
                 ),
@@ -302,14 +324,19 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
 
   String titleText() {
     String title = "";
-    if (this.trackDetailsModel != null) {
-      title =
-          this.categoryType.index == 1 ? "Incomes Details" : "Expense Details";
+    if (trackDetailsModel != null) {
+      title = getCategoryTypeName(categoryType) + " Details";
     } else {
-      title = this.categoryType.index == 1 ? "Add Incomes" : "Add Expense";
+      title = "Add " + getCategoryTypeName(categoryType);
     }
 
     return title;
+  }
+
+  String getCategoryTypeName(CategoryType categoryType) {
+      List<String> cName = categoryType.toString().split(".");
+      String categoryTypeName = cName[1];
+      return categoryTypeName[0].toUpperCase() + categoryTypeName.substring(1);
   }
 
   assignFormFieldValues(TrackDetailsModel trackModel) {
@@ -317,8 +344,7 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
       _amountController.text = trackModel.amount.toString();
       _descriptionController.text = trackModel.description;
       trackDate = DateTime.parse(trackModel.trackDate);
-      DropdownModel ddlV =
-          new DropdownModel(key: trackModel.categoryId, value: trackModel.categoryName);
+      DropdownModel ddlV = new DropdownModel(key: trackModel.categoryId, value: trackModel.categoryName);
       _data.categoryId = trackModel.categoryId;
       _ddlBloc.dropdownEvent.add(OnSelectedEvent(ddlV));
     }
@@ -342,7 +368,7 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(""),
+            title: Text("Alert"),
             content: Text("Are you want to delete this track data"),
             actions: <Widget>[
               FlatButton(
@@ -369,13 +395,13 @@ class TrackEntryDialogState extends State<TrackEntryDialog> {
     fs.reset();
     _amountController.text = "";
     _descriptionController.text = "";
-    showAlert("", "Track Added Successfully");
+    showAlert("Alert", "Track Added Successfully");
   }
 
   updateTrack(FormState fs) {
     _data.trackId = trackDetailsModel.trackId;
     updateTrackData(_data);
-    showAlert("", "Track Updated Successfully");
+    showAlert("Alert", "Track Updated Successfully");
   }
 
   Future<void> addTrackData(TrackModel trackModel) async {
