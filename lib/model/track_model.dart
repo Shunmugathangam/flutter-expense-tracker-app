@@ -99,3 +99,9 @@ class  MonthWiseTotalAmountModel {
       'TotalAmount': totalAmount
     };
 }
+
+class  CategoryBasedAmountModel {
+  String categoryName;
+  int totalAmount;
+  CategoryBasedAmountModel({this.categoryName, this.totalAmount});
+}
