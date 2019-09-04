@@ -6,6 +6,7 @@ import 'package:expensetracker/model/track_model.dart';
 import 'package:expensetracker/bloc/datetime_bloc.dart';
 import 'package:expensetracker/common/color.dart';
 import 'package:expensetracker/common/money_formatter.dart';
+import 'package:expensetracker/pdfviewer_page.dart';
 
 class TrackList extends StatefulWidget {
 
@@ -142,8 +143,12 @@ class TrackListState extends State<TrackList> {
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Theme.of(context).textTheme.display1.color,
               onPressed: () async {
-                Navigator.of(context).pushNamed('/pdfviewer');
-                //FlutterShareMe().shareToWhatsApp(msg:'hello,test app');
+                //Navigator.of(context).pushNamed('/pdfviewer');
+                Navigator.of(context).push(MaterialPageRoute<Null>(
+                    builder: (BuildContext context) {
+                      return PdfViewerPage(categoryType: categoryType, lstTrackDetails: this.lstTrackDetails, totalAmt: this.totalAmt);
+                    },
+                )).then((val) => {});
               },
               tooltip: '',
               child: Icon(Icons.picture_as_pdf),
