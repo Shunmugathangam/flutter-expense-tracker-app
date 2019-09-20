@@ -1,6 +1,6 @@
 # expensetracker
 
-A new Flutter project.
+https://github.com/Shunmugathangam/expensetracker/blob/master/images/Home.png
 
 ## Getting Started
 
