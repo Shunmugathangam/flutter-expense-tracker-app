@@ -100,8 +100,16 @@ class  MonthWiseTotalAmountModel {
     };
 }
 
+
 class  CategoryBasedAmountModel {
   String categoryName;
   int totalAmount;
   CategoryBasedAmountModel({this.categoryName, this.totalAmount});
+}
+
+class  BudgetExpensecomparisonModel {
+  String categoryName;
+  int actualAmount;
+  int budgetedAmount;
+  BudgetExpensecomparisonModel({this.categoryName, this.actualAmount, this.budgetedAmount});
 }
