@@ -17,3 +17,8 @@ void clearSharedPreference() async {
   final pref = await SharedPreferences.getInstance();
   pref.clear();
 }
+
+void logoutClearSharedPreference() async {
+  final pref = await SharedPreferences.getInstance();
+  pref.remove("username");
+}
