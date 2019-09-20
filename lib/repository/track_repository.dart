@@ -33,6 +33,11 @@ class TrackRepository {
     return await db.rawQuery("SELECT T.$colTrackId, T.$colCategoryId, T.$colDescription, T.$colAmount, T.$colTrackDate, T.$colOther, C.$colCategoryName, C.$colCategoryDesc, C.$colCategoryType, C.$colCategoryActive, C.$colColor  FROM $tblTrack T INNER JOIN $tblTrackCategories C ON T.$colCategoryId = C.$colCategoryId WHERE C.$colCategoryType = " + categoryType.index.toString() + " AND T.$colTrackDate BETWEEN '" + fromDate +" 00:00:00.000' AND '" + toDate + " 00:00:00.000' ORDER BY T.$colTrackDate DESC");
   }
 
+  Future<List<Map<String, dynamic>>> getTrackWithCategoryListOrderByCategory(CategoryType categoryType, String fromDate, String toDate) async {
+    Database db = await dbHelper.database;
+    return await db.rawQuery("SELECT T.$colTrackId, T.$colCategoryId, T.$colDescription, T.$colAmount, T.$colTrackDate, T.$colOther, C.$colCategoryName, C.$colCategoryDesc, C.$colCategoryType, C.$colCategoryActive, C.$colColor  FROM $tblTrack T INNER JOIN $tblTrackCategories C ON T.$colCategoryId = C.$colCategoryId WHERE C.$colCategoryType = " + categoryType.index.toString() + " AND T.$colTrackDate BETWEEN '" + fromDate +" 00:00:00.000' AND '" + toDate + " 00:00:00.000' ORDER BY C.$colCategoryName, T.$colTrackDate");
+  }
+
   Future<List<Map<String, dynamic>>> getTrackTotalAmt(CategoryType categoryType, String fromDate, String toDate) async {
     Database db = await dbHelper.database;
     return await db.rawQuery("SELECT SUM(T.$colAmount) AS TotalAmount FROM $tblTrack T INNER JOIN $tblTrackCategories C ON T.$colCategoryId = C.$colCategoryId WHERE C.$colCategoryType = " + categoryType.index.toString() + " AND T.$colTrackDate BETWEEN '" + fromDate +" 00:00:00.000' AND '" + toDate + " 00:00:00.000'");
