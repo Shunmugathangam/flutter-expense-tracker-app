@@ -1,6 +1,6 @@
 # expensetracker
 
-https://github.com/Shunmugathangam/expensetracker/blob/master/images/Home.png
+<img src="https://github.com/Shunmugathangam/expensetracker/blob/master/images/Home.png"></img>
 
 ## Getting Started
 
