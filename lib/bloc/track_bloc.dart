@@ -186,6 +186,31 @@ class  TrackBloc {
     return amt;
   }
 
+  Future<List<TrackDetailsModel>> getTrackDetailsLst(CategoryType categoryType, String fromDate, String toDate) async {
+    final rows = await trackRepository.getTrackWithCategoryListOrderByCategory(categoryType, fromDate, toDate);
+    List<TrackDetailsModel> lst = new List<TrackDetailsModel>();
+    rows.forEach((row) {
+       lst.add(TrackDetailsModel.fromJson(row));
+    });
+    return lst;
+  }
+
+  Future<int> totalSavingsAmount() async {
+    final totalIncome = await trackRepository.totalAmount(CategoryType.income);
+    final totalExpense = await trackRepository.totalAmount(CategoryType.expense);
+    int amt = 0;
+    int income = 0;
+    int expense = 0;
+    if(totalIncome[0]["TotalAmount"] != null) {
+      income = int.tryParse(totalIncome[0]["TotalAmount"].toString());
+    }
+    if(totalExpense[0]["TotalAmount"] != null) {
+      expense = int.tryParse(totalExpense[0]["TotalAmount"].toString());
+    }
+    amt = income - expense;
+    return amt;
+  }
+
 
   void dispose() {
     _trackStateController.close();
