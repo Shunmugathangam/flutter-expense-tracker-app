@@ -14,7 +14,7 @@
   </tr>
  </table>
  
- This app is used to track you daily expenses.
+ This app is used to track expenses.
 
 ## Getting Started
 
