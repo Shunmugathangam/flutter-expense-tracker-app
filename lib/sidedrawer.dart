@@ -98,6 +98,24 @@ Drawer sideDrawer(BuildContext context) {
               },
               trailing: Icon(Icons.search),
             ),
+            ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 40.0),
+              title: Text('Map Budget'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed("/budgetexpensemap");
+              },
+              trailing: Icon(Icons.map),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 40.0),
+              title: Text('Reports'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed("/report");
+              },
+              trailing: Icon(Icons.present_to_all),
+            ),
             Divider(
               color: Theme.of(context).textTheme.display2.color,
             ),

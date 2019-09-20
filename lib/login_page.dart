@@ -115,7 +115,7 @@ class LoginPageState extends State<LoginPage> {
       if (form.validate()) {
         form.save();
         // Call the Service here to authenticate user 
-        if(_userName.toUpperCase() == "USERNAME" && _password.toUpperCase() == "PASSWORD") {
+        if(_userName.toUpperCase() == "SHUNMUGA" && _password.toUpperCase() == "SELVIPRIYA") {
            setState(() {
             _isFormValid = true; 
            });

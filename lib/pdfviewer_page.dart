@@ -85,7 +85,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         </style>
       </head>
       <body>
-        <h2>""" + getCategoryTypeName(categoryType) + " " + formatDateMMMyyyy(lst[0].trackDate) + """</h2>
+        <p><b>Date: """ + DateTime.now().toString() + """</b></p>
+        <h2>""" + getCategoryTypeName(categoryType) + " of " + formatDateMMMyyyy(lst[0].trackDate) + """</h2>
 
         <table id="trackTable" style="width:100%">
           <caption></caption>
@@ -135,7 +136,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   String generateRow(List<TrackDetailsModel> lst) {
       String dataRow = "";
       lst.forEach((val) {
-          dataRow += "<tr><td>" + formatDate(val.trackDate) + "</td><td>" + val.categoryName + "</td><td>" + val.description + "</td><td>" + val.amount.toString() + "</td></tr>";
+          dataRow += "<tr><td>" + formatDate(val.trackDate) + "</td><td>" + val.categoryName + "</td><td>" + val.description + "</td><td> ₹ " + val.amount.toString() + "</td></tr>";
       });
       return dataRow;
   }
@@ -150,7 +151,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       List<CategoryBasedAmountModel> categoryData = categoryBasedAmount(lst);
       String dataRow = "";
       categoryData.forEach((val) {
-          dataRow += "<tr><td>" + val.categoryName + "</td><td>" + val.totalAmount.toString() + "</td></tr>";
+          dataRow += "<tr><td>" + val.categoryName + "</td><td> ₹ " + val.totalAmount.toString() + "</td></tr>";
       });
       return dataRow;
   }

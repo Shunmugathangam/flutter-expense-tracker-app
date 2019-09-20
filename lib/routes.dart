@@ -6,7 +6,8 @@ import 'package:expensetracker/summary_page.dart';
 import 'package:expensetracker/settings_page.dart';
 import 'package:expensetracker/search_page.dart';
 import 'package:expensetracker/search_result_page.dart';
-import 'package:expensetracker/pdfviewer_page.dart';
+import 'package:expensetracker/budgetexpensemap_page.dart';
+import 'package:expensetracker/pdfreport_page.dart';
  
 final routes = {
   '/': (context) => new HomePage(context),
@@ -17,5 +18,6 @@ final routes = {
   '/settings': (context) => new SettingsPage(),
   '/searchpage': (context) => new SearchPage(),
   '/searchresult': (context) => new SearchResultPage(),
-  '/pdfviewer': (context) => new PdfViewerPage()
+  '/budgetexpensemap': (context) => new BudgetExpenseMapScreen(context),
+  '/report': (context) => new PdfReportPage()
 };

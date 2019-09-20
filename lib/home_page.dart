@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
 
   void _select(Choice choice) {
     if(choice.key == "Logout") {
-      clearSharedPreference();
+      logoutClearSharedPreference();
       Navigator.of(context).pushNamedAndRemoveUntil("/login", (Route<dynamic> route) => false);
     }
   }

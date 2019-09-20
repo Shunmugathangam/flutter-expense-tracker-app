@@ -36,6 +36,9 @@ class TrackListState extends State<TrackList> {
   String _selectedtoYear = "";
   String _newDate = "";
 
+  List<TrackDetailsModel> lstTrackDetails;
+  String totalAmt;
+
   @override
   void initState() {
     super.initState();
@@ -98,15 +101,22 @@ class TrackListState extends State<TrackList> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                    // buildShareFloatingActionButton(),
-                    // SizedBox(height: 5,),
+                    buildShareFloatingActionButton(categoryType.index.toString() + "share"),
+                    SizedBox(height: 5,),
                     buildCopyBudgetFloatingActionButton(),
                     SizedBox(height: 5,),
                     buildAddFloatingActionButton()
               ],);
     }
     else {
-        return buildAddFloatingActionButton();
+        return Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                    buildShareFloatingActionButton(categoryType.index.toString() + "share"),
+                    SizedBox(height: 5,),
+                    buildAddFloatingActionButton()
+              ],);
     }  
   }
 
@@ -123,7 +133,7 @@ class TrackListState extends State<TrackList> {
       //   );
 
         return FloatingActionButton(
-              heroTag: 1,
+              heroTag: categoryType.index.toString() + "copy",
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Theme.of(context).textTheme.display1.color,
               onPressed: () async {
@@ -137,9 +147,9 @@ class TrackListState extends State<TrackList> {
 
   }
 
-  Widget buildShareFloatingActionButton() {
+  Widget buildShareFloatingActionButton(String heroTag) {
         return FloatingActionButton(
-              heroTag: 2,
+              heroTag: heroTag,
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Theme.of(context).textTheme.display1.color,
               onPressed: () async {
@@ -149,6 +159,8 @@ class TrackListState extends State<TrackList> {
                       return PdfViewerPage(categoryType: categoryType, lstTrackDetails: this.lstTrackDetails, totalAmt: this.totalAmt);
                     },
                 )).then((val) => {});
+
+                //FlutterShareMe().shareToWhatsApp(msg:'hello,test app');
               },
               tooltip: '',
               child: Icon(Icons.picture_as_pdf),
@@ -208,6 +220,7 @@ class TrackListState extends State<TrackList> {
                 default:
                   totalAmount = snapshot.data;
                   String amt = currencyFormatWithSymbol(double.tryParse(snapshot.data.toString()));
+                  totalAmt = amt;
                   return Text(amt);
               }
             },
@@ -234,6 +247,7 @@ class TrackListState extends State<TrackList> {
   }
 
   ListView _trackList(List<TrackDetailsModel> snapshot) {
+    this.lstTrackDetails = snapshot;
     return ListView.builder(
       // Must have an item count equal to the number of items!
       itemCount: snapshot.length,
@@ -350,7 +364,9 @@ class TrackListState extends State<TrackList> {
                       _newDate = dt.toString();
 
                       _trackBloc.copyBudget(_selectedFromYear, _selectedFromMonth, _selectedtoYear,_selectedtoMonth, _newDate).then((onValue){
-                          print(onValue);
+                        setState(() {
+                          initMonthName(); 
+                        });
                       });
                   }
 

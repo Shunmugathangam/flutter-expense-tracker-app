@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:expensetracker/model/category_model.dart';
 import 'package:expensetracker/bloc/track_bloc.dart';
 import 'package:expensetracker/bloc/datetime_bloc.dart';
 import 'package:expensetracker/common/money_formatter.dart';
+import 'package:flutter_html_to_pdf/flutter_html_to_pdf.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:simple_share/simple_share.dart';
 
 class SummaryScreen extends StatefulWidget {
 
@@ -41,6 +45,19 @@ class SummaryScreenState extends State<SummaryScreen> {
       appBar: AppBar(
         title: Text('Summary'),
         centerTitle: true,
+        actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.share), 
+              onPressed: () async {
+                  String filePath = await generateDocument();
+                  if(filePath != "") {
+                      final uri = Uri.file(filePath);
+                      shareFile(uri.toString());
+                  }
+              }
+              ),
+            Padding(padding: EdgeInsets.only(right: 10.0),)
+        ],
       ),
       body: Column(
       children: <Widget>[
@@ -177,9 +194,103 @@ class SummaryScreenState extends State<SummaryScreen> {
       return categoryTypeName[0].toUpperCase() + categoryTypeName.substring(1);
   }
 
+  String generateMonthWiseTrackAmountRow(List<Map<String, dynamic>> lst) {
+      String dataRow = "";
+      lst.forEach((model) {
+          dataRow += "<tr><td>" + model["Year"].toString() + "-" + model["Month"].toString() + "</td><td>" + currencyFormatWithoutSymbol(double.tryParse(model["Income"].toString())) + "</td><td>" + currencyFormatWithoutSymbol(double.tryParse(model["Expense"].toString())) + "</td><td> ₹ " + calculateSavings(model["Income"], model["Expense"]) + "</td></tr>";
+      });
+
+      if(lst.length == 0) {
+        dataRow += "<tr><td colspan='4'></td></tr>";
+      }
+
+      return dataRow;
+  }
+
+  String generatedPdfFilePath;
+
+  Future<String> generateDocument() async {
+
+    generatedPdfFilePath = "";
+
+    List<Map<String, dynamic>> lst = await _asyncMonthWiseTrackAmount();
+    int savingsAmt = await gettotalSavings();
+    
+    var htmlContent = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+        }
+        td, p {
+          padding: 5px;
+          text-align: left;
+        }
+        th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          padding-left: 5px;
+          background-color: #4CAF50;
+          text-align: left;
+        }
+        table tr:nth-child(even){background-color: #f2f2f2;}
+        table tr:hover {background-color: #ddd;}
+        </style>
+      </head>
+      <body>
+        <p><b>Date: """ + DateTime.now().toString() + """</b></p>
+        <h2>Summary Report</h2>
+        <h3>Total Savings: """ + savingsAmt.toString() + """</h3>
+
+        <table id="expenseTable" style="width:100%">
+          <caption></caption>
+          <tr>
+            <th>Month</th>
+            <th>Income</th>
+            <th>Expense</th>
+            <th>Savings</th>
+          </tr>
+
+          """ + generateMonthWiseTrackAmountRow(lst) + """
+          
+        </table>
+
+      </body>
+    </html>
+
+    """;
+
+    //Directory appDocDir = await getApplicationDocumentsDirectory();
+    Directory appDocDir = await getTemporaryDirectory();
+    var targetPath = appDocDir.path;
+    var targetFileName =  "Summary_Report";
+    var generatedPdfFile = await FlutterHtmlToPdf.convertFromHtmlContent(
+        htmlContent, targetPath, targetFileName);
+    generatedPdfFilePath = generatedPdfFile.path;
+
+    return generatedPdfFilePath;
+  }
+
+  void shareFile(String filePath) async {
+     SimpleShare.share(
+                uri: filePath,
+                title: "Monthly Report",
+                subject: "Summary Report",
+                msg: "Please find the attached Summary Report");
+  }
+
   void totalSavings(){
     _trackBloc.totalSavings();
   }
+
+  Future<int> gettotalSavings() async {
+      int amt = await _trackBloc.totalSavingsAmount();
+      return amt;
+  }
+
 }
 
 
