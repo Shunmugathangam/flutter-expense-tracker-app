@@ -6,6 +6,7 @@ import 'package:expensetracker/routes.dart';
 import 'package:provider/provider.dart';
 
 main() async {
+  WidgetsFlutterBinding.ensureInitialized(); 
   String mode =  await getSharedPreference(ThemeSharedPreferenceKey.mode.index.toString());
   String color =  await getSharedPreference(ThemeSharedPreferenceKey.color.index.toString());
   ThemeData theme = ThemeData.light(); // get theme from prefs
@@ -49,7 +50,7 @@ class AppEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     
     return ChangeNotifierProvider<ThemeChanger>(
-      builder: (_) => ThemeChanger(theme),
+      create: (context) => ThemeChanger(theme),
       child: TrakerApp(isLoggedIn));
   }
 
