@@ -3,9 +3,6 @@
 <table>
   <tr>
     <td>
-      <img src="https://github.com/Shunmugathangam/expensetracker/blob/master/images/Home.png" width="200px" height="400"></img>
-    </td>
-    <td>
       <img src="https://github.com/Shunmugathangam/expensetracker/blob/master/images/Menu.png" width="200px" height="400"></img>
     </td>
     <td>
